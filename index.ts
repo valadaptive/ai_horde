@@ -1,4 +1,4 @@
-import SuperMap from "@thunder04/supermap"
+import QuickLRU from "quick-lru";
 import { readFileSync } from "fs"
 import { join } from "path";
 
@@ -100,7 +100,6 @@ export class APIError extends Error {
     }
 }
 
-
 export class AIHorde {
     #default_token?: string
     #cache_config: AIHordeCacheConfiguration
@@ -127,17 +126,17 @@ export class AIHorde {
         }
         if(Object.values(this.#cache_config).some(v => !Number.isSafeInteger(v) || v < 0)) throw new TypeError("Every cache duration must be a positive safe integer")
         this.#cache = {
-            users: this.#cache_config.users ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.users}) : undefined,
-            generations_check: this.#cache_config.generations_check ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.generations_check}) : undefined,
-            generations_status: this.#cache_config.generations_status ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.generations_status}) : undefined,
-            interrogations_status: this.#cache_config.interrogations_status ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.interrogations_status}) : undefined,
-            models: this.#cache_config.models ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.models}) : undefined,
-            modes: this.#cache_config.modes ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.modes}) : undefined,
-            news: this.#cache_config.news ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.news}) : undefined,
-            performance: this.#cache_config.performance ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.performance}) : undefined,
-            workers: this.#cache_config.workers ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.workers}) : undefined,
-            teams: this.#cache_config.teams ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.teams}) : undefined,
-            sharedkeys: this.#cache_config.sharedkeys ? new SuperMap({intervalTime: options?.cache_interval ?? 1000, expireAfter: this.#cache_config.sharedkeys}) : undefined,
+            users: this.#cache_config.users ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.users}) : undefined,
+            generations_check: this.#cache_config.generations_check ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.generations_check}) : undefined,
+            generations_status: this.#cache_config.generations_status ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.generations_status}) : undefined,
+            interrogations_status: this.#cache_config.interrogations_status ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.interrogations_status}) : undefined,
+            models: this.#cache_config.models ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.models}) : undefined,
+            modes: this.#cache_config.modes ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.modes}) : undefined,
+            news: this.#cache_config.news ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.news}) : undefined,
+            performance: this.#cache_config.performance ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.performance}) : undefined,
+            workers: this.#cache_config.workers ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.workers}) : undefined,
+            teams: this.#cache_config.teams ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.teams}) : undefined,
+            sharedkeys: this.#cache_config.sharedkeys ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.sharedkeys}) : undefined,
         }
         
         try {
@@ -165,10 +164,6 @@ export class AIHorde {
 
     clearCache() {
         Object.values(this.#cache).forEach(m => m.clear())
-    }
-
-    get cache() {
-        return this.#cache
     }
 
     parseAgent(agent: string) {
@@ -1314,17 +1309,17 @@ export interface AIHordeCacheConfiguration {
 }
 
 interface AIHordeCache {
-    users?: SuperMap<string, UserDetails>,
-    generations_check?: SuperMap<string, RequestStatusCheck>,
-    generations_status?: SuperMap<string, RequestStatusStable>,
-    interrogations_status?: SuperMap<string, InterrogationStatus>,
-    models?: SuperMap<string, ActiveModel[]>,
-    modes?: SuperMap<string, HordeModes>,
-    news?: SuperMap<string, Newspiece[]>,
-    performance?: SuperMap<string, HordePerformanceStable>,
-    workers?: SuperMap<string, WorkerDetailsStable>,
-    teams?: SuperMap<string, TeamDetails>,
-    sharedkeys?: SuperMap<string, SharedKeyDetails>
+    users?: QuickLRU<string, UserDetails>,
+    generations_check?: QuickLRU<string, RequestStatusCheck>,
+    generations_status?: QuickLRU<string, RequestStatusStable>,
+    interrogations_status?: QuickLRU<string, InterrogationStatus>,
+    models?: QuickLRU<string, ActiveModel[]>,
+    modes?: QuickLRU<string, HordeModes>,
+    news?: QuickLRU<string, Newspiece[]>,
+    performance?: QuickLRU<string, HordePerformanceStable>,
+    workers?: QuickLRU<string, WorkerDetailsStable>,
+    teams?: QuickLRU<string, TeamDetails>,
+    sharedkeys?: QuickLRU<string, SharedKeyDetails>
 }
 
 export interface ModifyUserInput {
