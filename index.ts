@@ -1,12 +1,14 @@
 import QuickLRU from "quick-lru";
-import { readFileSync } from "fs"
-import { join } from "path";
 
+declare const PACKAGE_INFO: {
+    name: string,
+    version: string,
+    bugs: string
+}
 
 /*
  * https://github.com/db0/AI-Horde/blob/main/CHANGELOG.md
  */
-
 
 export const ModelGenerationInputStableSamplers = Object.freeze({
     "k_lms": "k_lms",
@@ -138,17 +140,10 @@ export class AIHorde {
             teams: this.#cache_config.teams ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.teams}) : undefined,
             sharedkeys: this.#cache_config.sharedkeys ? new QuickLRU({maxSize: Infinity, maxAge: this.#cache_config.sharedkeys}) : undefined,
         }
-        
-        try {
-            let pckg = JSON.parse(readFileSync(join(__dirname, "./package.json"), "utf-8"))
-            this.#client_agent = options?.client_agent ?? `${pckg.name}:${pckg.version}:${pckg.bugs?.slice(8)}`
-            this.VERSION = pckg.version
-        } catch {
-            this.#client_agent = options?.client_agent ?? `@zeldafan0225/ai_horde:Version_Unknown:github.com/ZeldaFan0225/ai_horde/issues`
-            this.VERSION = "Unknown"
-        }
 
-        
+        this.#client_agent = options?.client_agent ?? `${PACKAGE_INFO.name}:${PACKAGE_INFO.version}:${PACKAGE_INFO.bugs?.slice(8)}`
+        this.VERSION = PACKAGE_INFO.version
+
         this.ratings = new AIHordeRatings({
             api_route: options?.ratings_api_route ?? "https://ratings.aihorde.net/api/v1",
             default_token: options?.default_token,
