@@ -77,7 +77,7 @@ export const ModelGenerationInputControlTypes = Object.freeze( {
 
 export const ModelPayloadTextInversionsStable = Object.freeze({
     prompt: "prompt",
-    negrpompt: "negprompt"
+    negprompt: "negprompt"
 } as const)
 
 export class APIError extends Error {
